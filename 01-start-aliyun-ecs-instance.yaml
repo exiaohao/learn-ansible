@@ -1,0 +1,39 @@
+- name: basic provisioning example
+  hosts: localhost
+  vars:
+    alicloud_region: cn-huhehaote
+    image: ubuntu_16_0402_32_20G_alibase_20180409.vhd
+    instance_type: ecs.t5-lc2m1.nano
+    vswitch_id: vsw-hp3clzscsdebbyuoebgsq
+    assign_public_ip: True
+    max_bandwidth_out: 1
+    host_name: demo-host
+    password: MyP@ssword-DemoInstance
+    system_disk_category: cloud_efficiency
+    system_disk_size: 20
+    internet_charge_type: PayByTraffic
+    security_groups: ["sg-hp3atpe87tedkilz4shx"]
+    instance_ids:
+    - i-demo-1
+    force: True
+
+  tasks:
+    - name: launch ECS instance in VPC network
+      ali_instance:
+        alicloud_access_key: '{{ lookup("env", "ALICLOUD_ACCESS_KEY") }}' # '{{ alicloud_access_key }}'
+        alicloud_secret_key: '{{ lookup("env", "ALICLOUD_SECRET_KEY") }}' # '{{ alicloud_secret_key }}'
+        alicloud_region: '{{ alicloud_region }}'
+        image: '{{ image }}'
+        system_disk_category: '{{ system_disk_category }}'
+        system_disk_size: '{{ system_disk_size }}'
+        instance_type: '{{ instance_type }}'
+        vswitch_id: '{{ vswitch_id }}'
+        assign_public_ip: '{{ assign_public_ip }}'
+        internet_charge_type: '{{ internet_charge_type }}'
+        max_bandwidth_out: '{{ max_bandwidth_out }}'
+        instance_tags:
+            Name: hao-demo
+        host_name: '{{ host_name }}'
+        password: '{{ password }}'
+        security_groups: '{{ security_groups }}'
+```

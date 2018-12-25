@@ -1,3 +1,4 @@
+# basic provisioning example vpc network
 - name: basic provisioning example
   hosts: localhost
   vars:
@@ -8,13 +9,16 @@
     assign_public_ip: True
     max_bandwidth_out: 1
     host_name: demo-host
-    password: MyP@ssword-DemoInstance
     system_disk_category: cloud_efficiency
     system_disk_size: 20
     internet_charge_type: PayByTraffic
-    security_groups: ["sg-hp3atpe87tedkilz4shx"]
-    instance_ids:
-    - i-demo-1
+    password: H@0Dem0P@ssword~
+    security_groups:
+    - sg-hp3atpe87tedkilz4shx
+    key_name: hao-ansible
+    instance_tags:
+      Group: test
+      Machine: demo
     force: True
 
   tasks:
@@ -31,9 +35,8 @@
         assign_public_ip: '{{ assign_public_ip }}'
         internet_charge_type: '{{ internet_charge_type }}'
         max_bandwidth_out: '{{ max_bandwidth_out }}'
-        instance_tags:
-            Name: hao-demo
+        key_name: '{{ key_name }}'
+        instance_tags: '{{ instance_tags }}'
         host_name: '{{ host_name }}'
         password: '{{ password }}'
         security_groups: '{{ security_groups }}'
-```

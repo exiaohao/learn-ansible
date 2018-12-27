@@ -1,21 +1,36 @@
-- name: add firewall rules
-  hosts:
-  - demo-host
-  connection: local
-  remote_user: root
-  sudo: yes
+- name: Install docker
+  hosts: demo-host
   tasks:
-    - name: pre update
-      command: apt-get update
-    - name: install requirements
-      command: apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-    - name: install docker-gpg
-      command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    - name: install docker
-      command: apt-key fingerprint 0EBFCD88
-    - name: add deb repo
-      command: add-apt-repository "deb [arch=amd64]https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    - name: apt update
-      apt: update_cache=yes
-    - name: install specified docker version
-      apt: docker-ce=18.9.0
+  - name: Force update
+    apt:
+      update_cache: yes
+
+  - name: Install requirements
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+
+  - name: Add Docker offical GPG key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+
+  - name: Add fingerprint
+    command: apt-key fingerprint 0EBFCD88
+
+  - name: Add Docker APT repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+
+  - name: Force update
+    apt:
+      update_cache: yes
+
+  - name: Install docker
+    apt:
+      name: docker-ce
+

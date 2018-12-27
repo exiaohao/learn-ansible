@@ -1,0 +1,10 @@
+ok: [demo-host] => {
+    "changed": false,
+    "invocation": {
+        "module_args": {
+            "containers": "all",
+            "interval": 10
+        }
+    },
+    "msg": "Docker containers:\n{\"BlockIO\":\"0B / 0B\",\"CPUPerc\":\"0.00%\",\"Container\":\"3036592bbf73\",\"ID\":\"3036592bbf73\",\"MemPerc\":\"0.01%\",\"MemUsage\":\"48KiB / 488.1MiB\",\"Name\":\"quirky_roentgen\",\"NetIO\":\"54B / 0B\",\"PIDs\":\"1\"}{\"BlockIO\":\"28.7kB / 0B\",\"CPUPerc\":\"0.00%\",\"Container\":\"e7292f20e680\",\"ID\":\"e7292f20e680\",\"MemPerc\":\"0.28%\",\"MemUsage\":\"1.387MiB / 488.1MiB\",\"Name\":\"demo-nginx\",\"NetIO\":\"118kB / 99.1kB\",\"PIDs\":\"2\"}"
+}

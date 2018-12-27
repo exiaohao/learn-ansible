@@ -157,3 +157,99 @@ After nginx container is running, We can also add a task to check nginx's health
 ```
 
 See [05-nginx-with-health-check.yaml](05-nginx-with-health-check.yaml) for full config.
+
+### Make your own module
+
+Although there're lots of modules, you can alse make a module for yourself.
+
+The following sample shows that a tool can fetch a specified page, if page returns HTTP 200 status, it'll return page content, otherwise it'll be exit and show you error reason after retrying specified times(the default retrying times is 5).
+
+```python
+#!/usr/bin/env python
+# encoding: utf-8
+
+DOCUMENTATION = '''
+HERE's DOCUMENTATION
+'''
+
+EXAMPLES = '''
+HERE's EXAMPLES
+'''
+
+import requests
+
+from ansible.module_utils.basic import *
+
+def main():
+    module = AnsibleModule(
+        argument_spec = dict(
+            url = dict(required=True),
+            headers = dict(required=False, type='dict', default=None),
+            timeout = dict(required=False, type='int', default=5),
+            max_retries = dict(required=False, type='int', default=5),
+            try_delay = dict(required=False, type='int', default=3),
+        )
+    )
+
+    url = module.params['url']
+    headers = module.params['headers'] or {}
+    timeout = module.params['timeout']
+    max_retries = module.params['max_retries']
+    try_delay = module.params['try_delay']
+
+    for try_count in xrange(max_retries):
+        if try_count > 0:
+            time.sleep(try_delay)
+        try:
+            req = requests.get(url, headers=headers, timeout=timeout)
+            if req.status_code == 200:
+                module.exit_json(msg=req.text, failed_attempts=try_count)
+                return
+        except Exception as e:
+            continue
+    module.fail_json(msg='Maximum attempts reached: ' + str(e), failed_attempts=try_count)
+
+main()
+```
+
+After put the module to ansible module directory, we can call it from playbook:
+```yaml
+- name: Test fetch page
+  hosts: localhost
+  tasks:
+  - name: Try fetch page
+    fetch_page:
+      url: "http://demo-host"
+```
+
+I've trying to fetch the default page which is created by [Start a nginx in Docker](#start-a-nginx-in-docker) , the results:
+```bash
+TASK [Try fetch page] ************************************************************************************************************************************************************************************************************************
+task path: /root/ansible/test-fetch.yaml:4
+<127.0.0.1> ESTABLISH LOCAL CONNECTION FOR USER: root
+<127.0.0.1> EXEC /bin/sh -c 'echo ~root && sleep 0'
+<127.0.0.1> EXEC /bin/sh -c '( umask 77 && mkdir -p "` echo /root/.ansible/tmp/ansible-tmp-1545911236.21-256641403308025 `" && echo ansible-tmp-1545911236.21-256641403308025="` echo /root/.ansible/tmp/ansible-tmp-1545911236.21-256641403308025 `" ) && sleep 0'
+Using module file /root/.ansible/plugins/modules/fetch_page
+<127.0.0.1> PUT /root/.ansible/tmp/ansible-local-11904xnGBF2/tmpPcifCM TO /root/.ansible/tmp/ansible-tmp-1545911236.21-256641403308025/AnsiballZ_fetch_page
+<127.0.0.1> EXEC /bin/sh -c 'chmod u+x /root/.ansible/tmp/ansible-tmp-1545911236.21-256641403308025/ /root/.ansible/tmp/ansible-tmp-1545911236.21-256641403308025/AnsiballZ_fetch_page && sleep 0'
+<127.0.0.1> EXEC /bin/sh -c '/usr/bin/python2 /root/.ansible/tmp/ansible-tmp-1545911236.21-256641403308025/AnsiballZ_fetch_page && sleep 0'
+<127.0.0.1> EXEC /bin/sh -c 'rm -f -r /root/.ansible/tmp/ansible-tmp-1545911236.21-256641403308025/ > /dev/null 2>&1 && sleep 0'
+ok: [localhost] => {
+    "changed": false,
+    "failed_attempts": 0,
+    "invocation": {
+        "module_args": {
+            "headers": null,
+            "max_retries": 5,
+            "timeout": 5,
+            "try_delay": 3,
+            "url": "http://demo-host"
+        }
+    },
+    "msg": "<!DOCTYPE html>\n<html>\n<head>\n<title>Welcome to nginx!</title>\n<style>\n    body {\n        width: 35em;\n        margin: 0 auto;\n        font-family: Tahoma, Verdana, Arial, sans-serif;\n    }\n</style>\n</head>\n<body>\n<h1>Welcome to nginx!</h1>\n<p>If you see this page, the nginx web server is successfully installed and\nworking. Further configuration is required.</p>\n\n<p>For online documentation and support please refer to\n<a href=\"http://nginx.org/\">nginx.org</a>.<br/>\nCommercial support is available at\n<a href=\"http://nginx.com/\">nginx.com</a>.</p>\n\n<p><em>Thank you for using nginx.</em></p>\n</body>\n</html>\n"
+}
+META: ran handlers
+META: ran handlers
+```
+
+

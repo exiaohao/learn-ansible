@@ -82,6 +82,66 @@ To                         Action      From
 
 ### Install Docker CE.
 
-Following Docker offical installation guide: https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce and Ansible apt module: https://docs.ansible.com/ansible/latest/modules/apt_module.html, I've make a yaml:
+Following Docker offical installation guide: https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce and Ansible apt module: https://docs.ansible.com/ansible/latest/modules/apt_module.html, I've make a yaml: [03-docker.yaml](03-docker.yaml)
 
+In chinamainland sometimes there's some problem to get access to Docker offical site, ansible can set `HTTP_PROXY` and `HTTPS_PROXY` to environment variables, can help solve some problems. Sample:
+```yaml
+- name: some playbook
+  environment:
+    http_proxy: http://proxy.example.com:8080
+  ...
+  tasks:
+    - name: some task
+      apt: name=foo
+        environment:
+          http_proxy: http://proxy.example.com:8080
+```
+
+### Start a nginx in Docker
+
+Ansible docker module: https://docs.ansible.com/ansible/latest/modules/docker_container_module.html
+
+You'd install Python module **docker** at first, otherwise ansible will failed because 
+> Failed to import docker or docker-py - No module named docker. Try `pip install docker` or `pip install docker-py` (Python 2.6)
+> Please note that the docker-py Python module has been superseded by docker (see here for details). For Python 2.6, docker-py must be used. Otherwise, it is recommended to install the docker Python module. Note that both modules should not be installed at the same time. Also note that when both modules are installed and one of them is uninstalled, the other might no longer function and a reinstall of it is required.
+
+create a simple nginx container:
+```yaml
+- name: create nginx container
+  hosts: demo-host
+  tasks:
+  - name: Install package docker for python avoid somethings wrong
+    pip:
+      name: docker
+  - name: Create a container called demo-nginx
+    docker_container:
+      name: demo-nginx
+      image: nginx
+```
+
+Check nginx is started:
+```bash
+$ curl demo-host -v
+
+* About to connect() to demo-host port 80 (#0)
+*   Trying *.*.*.*...
+* Connected to demo-host (*.*.*.*) port 80 (#0)
+> GET / HTTP/1.1
+> User-Agent: curl/7.29.0
+> Host: demo-host
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+< Server: nginx/1.15.8
+< Date: Thu, 27 Dec 2018 10:00:03 GMT
+< Content-Type: text/html
+< Content-Length: 612
+< Last-Modified: Tue, 25 Dec 2018 09:56:47 GMT
+< Connection: keep-alive
+< ETag: "5c21fedf-264"
+< Accept-Ranges: bytes
+<
+<!DOCTYPE html>
+...
+```
 

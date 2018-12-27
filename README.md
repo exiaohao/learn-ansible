@@ -40,50 +40,48 @@ We'll create a instance w/ Ubuntu 16.04 and preseted network and security groups
 
 See https://github.com/alibaba/ansible-provider/blob/master/lib/ansible/modules/cloud/alicloud/ali_instance.py#L27-L177 for more detailed documentation.
 
-```yaml
-# basic provisioning example vpc network
-- name: basic provisioning example
-  hosts: localhost // Run locally
-  vars:
-    alicloud_region: cn-huhehaote
-    image: ubuntu_16_0402_32_20G_alibase_20180409.vhd
-    instance_type: ecs.t5-lc2m1.nano
-    vswitch_id: vsw-hp3clzscsdebbyuoebgsq
-    assign_public_ip: True
-    max_bandwidth_out: 1
-    host_name: demo-host
-    system_disk_category: cloud_efficiency
-    system_disk_size: 20
-    internet_charge_type: PayByTraffic
-    password: H@0Dem0P@ssword~
-    security_groups:
-    - sg-hp3atpe87tedkilz4shx
-    key_name: hao-ansible
-    instance_tags:
-      Group: test
-      Machine: demo
-    force: True
+Run `ansible-playbook 01-start-aliyun-ecs-instance.yaml` and results like following text:
+```
+PLAY [basic provisioning example] ************************************************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************************************************************************************************************************************
+ok: [localhost]
+
+TASK [launch ECS instance in VPC network] ****************************************************************************************************************************************************************************************************
+changed: [localhost]
+
+PLAY RECAP ***********************************************************************************************************************************************************************************************************************************
+localhost                  : ok=2    changed=1    unreachable=0    failed=0
 ```
 
-```yaml
-...
-  tasks:
-    - name: launch ECS instance in VPC network
-      ali_instance:
-        alicloud_access_key: '{{ lookup("env", "ALICLOUD_ACCESS_KEY") }}' # '{{ alicloud_access_key }}'
-        alicloud_secret_key: '{{ lookup("env", "ALICLOUD_SECRET_KEY") }}' # '{{ alicloud_secret_key }}'
-        alicloud_region: '{{ alicloud_region }}'
-        image: '{{ image }}'
-        system_disk_category: '{{ system_disk_category }}'
-        system_disk_size: '{{ system_disk_size }}'
-        instance_type: '{{ instance_type }}'
-        vswitch_id: '{{ vswitch_id }}'
-        assign_public_ip: '{{ assign_public_ip }}'
-        internet_charge_type: '{{ internet_charge_type }}'
-        max_bandwidth_out: '{{ max_bandwidth_out }}'
-        key_name: '{{ key_name }}'
-        instance_tags: '{{ instance_tags }}'
-        host_name: '{{ host_name }}'
-        password: '{{ password }}'
-        security_groups: '{{ security_groups }}'
+### Change the OS/Firewall settings of the started instance to further enhance it’s security level.
+
+After creating aliyun instance and append security groups, ansible has ***ufw*** package can apply ufw rules quickly:
+```bash
+ansible demo-host -s -m ufw -a "state=enabled policy=allow"         # Enable ufw
+ansible demo-host -s -m ufw -a "rule=allow name=OpenSSH"            # Enable OpenSSH, otherwise it will out of control
+ansible demo-host -s -m ufw -a "direction=incoming policy=deny"     # Deny all another incoming traffic
 ```
+
+Also can use ansible-playbook to apply it, see [02-firewall-rules.yaml](02-firewall-rules.yaml)
+
+ufw status:
+```bash
+# ufw status verbose
+
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp (OpenSSH)           ALLOW IN    Anywhere
+22/tcp (OpenSSH (v6))      ALLOW IN    Anywhere (v6)
+```
+
+### Install Docker CE.
+
+Following Docker offical installation guide: https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce and Ansible apt module: https://docs.ansible.com/ansible/latest/modules/apt_module.html, I've make a yaml:
+
+

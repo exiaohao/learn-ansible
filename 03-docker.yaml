@@ -1,0 +1,21 @@
+- name: add firewall rules
+  hosts:
+  - demo-host
+  connection: local
+  remote_user: root
+  sudo: yes
+  tasks:
+    - name: pre update
+      command: apt-get update
+    - name: install requirements
+      command: apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+    - name: install docker-gpg
+      command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    - name: install docker
+      command: apt-key fingerprint 0EBFCD88
+    - name: add deb repo
+      command: add-apt-repository "deb [arch=amd64]https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    - name: apt update
+      apt: update_cache=yes
+    - name: install specified docker version
+      apt: docker-ce=18.9.0

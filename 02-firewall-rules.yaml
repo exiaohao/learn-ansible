@@ -1,0 +1,19 @@
+- name: add firewall rules
+  hosts:
+  - demo-host
+  connection: local
+  remote_user: root
+  sudo: yes
+  tasks:
+  - name: Enable ufw
+    ufw:
+      state: enabled
+      policy: allow
+ - name: Allow ssh in
+   ufw:
+     rule: allow
+     name: OpenSSH
+ - name: Disable default in
+   ufw:
+     direction: incoming
+     policy: deny

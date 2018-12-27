@@ -1,0 +1,20 @@
+- name: create nginx container
+  hosts: demo-host
+  tasks:
+  - name: Install package docker for python
+    pip:
+      name: docker
+
+  - name: Create a container called demo-nginx
+    docker_container:
+      name: demo-nginx
+      image: nginx
+      ports:
+      - 80:80
+
+  - name: nginx health check
+    health_check:
+      url: "http://demo-host/"
+      delay_between_tries: 2
+      max_retries: 5
+      expected_status: 200

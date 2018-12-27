@@ -145,3 +145,15 @@ $ curl demo-host -v
 ...
 ```
 
+After nginx container is running, We can also add a task to check nginx's health status. I've added a module called [ansible-health-check](https://github.com/trueaccord/ansible-health-check) and a task like:
+```yaml
+...
+- name: nginx health check
+  health_check:
+    url: "http://demo-host/"
+    delay_between_tries: 2
+    max_retries: 5
+    expected_status: 200
+```
+
+See [05-nginx-with-health-check.yaml](05-nginx-with-health-check.yaml) for full config.

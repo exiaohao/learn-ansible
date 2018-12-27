@@ -1,0 +1,6 @@
+- name: get container status
+  hosts: demo-host
+  tasks:
+  - name: get usage
+    container_usage:
+      containers: "all"

@@ -1,0 +1,14 @@
+ok: [localhost] => {
+    "changed": false,
+    "failed_attempts": 0,
+    "invocation": {
+        "module_args": {
+            "headers": null,
+            "max_retries": 5,
+            "timeout": 5,
+            "try_delay": 3,
+            "url": "http://demo-host"
+        }
+    },
+    "msg": "There's 127 words, there're: 0,0,35em,35em,Arial,Arial,Commercial,Commercial,For,For,Further,Further,If,If,Tahoma,Tahoma,Thank,Thank,Thank,Verdana,Verdana,Welcome,Welcome,Welcome,Welcome,and,and,and,and,at,at,auto,auto,available,available,body,body,com,com,com,configuration,configuration,documentation,documentation,family,family,font,font,for,for,for,installed,installed,is,is,is,is,is,is,margin,margin,nginx,nginx,nginx,nginx,nginx,nginx,nginx,nginx,nginx,nginx,nginx,nginx,nginx,nginx,nginx,online,online,org,org,org,page,page,please,please,refer,refer,required,required,sans,sans,see,see,serif,serif,server,server,successfully,successfully,support,support,support,support,the,the,this,this,to,to,to,to,to,to,using,using,using,web,web,width,width,working,working,you,you,you,you,you"
+}
